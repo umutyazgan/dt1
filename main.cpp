@@ -36,6 +36,8 @@ class gramer {
     public:
         explicit gramer(std::string kural_satirlari);
         void yazdir();
+        std::set<std::string> ilk(std::string &katar);
+        std::set<std::string> izle(std::string &nt);
 };
 
 gramer::gramer(std::string kural_satirlari) {
@@ -81,6 +83,16 @@ void gramer::yazdir() {
         }
         std::cout << std::endl;
     }
+}
+
+std::set<std::string> gramer::ilk(std::string &katar) {
+    std::set<std::string> ilk_kumesi;
+    return ilk_kumesi;
+}
+
+std::set<std::string> gramer::izle(std::string &nt) {
+    std::set<std::string> izle_kumesi;
+    return izle_kumesi;
 }
 
 
