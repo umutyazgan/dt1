@@ -82,24 +82,24 @@ bool nt::terminal_mi() {
 
 class kural {
     private:
-        std::string *nt;
-        std::vector<std::string> *ac;
+        std::string nt;
+        std::vector<std::string> ac;
     public:
-        kural(std::string *isim, std::vector<std::string> *a);
-        std::string* non_terminal() const;
-        std::vector<std::string>* acilim() const;
+        kural(std::string &isim, std::vector<std::string> &a);
+        std::string non_terminal() const;
+        std::vector<std::string> acilim() const;
 };
 
-kural::kural(std::string *isim, std::vector<std::string> *a) {
+kural::kural(std::string &isim, std::vector<std::string> &a) {
     nt = isim;
     ac = a;
 }
 
-std::string* kural::non_terminal() const {
+std::string kural::non_terminal() const {
     return nt;
 }
 
-std::vector<std::string>* kural::acilim() const {
+std::vector<std::string> kural::acilim() const {
     return ac;
 }
 
@@ -142,16 +142,16 @@ gramer::gramer(std::string kural_satirlari) {
             s.erase(0, konum + 1);
         }
         simgeler.push_back(s);
-        kural k(&non_terminal, &simgeler);
+        kural k(non_terminal, simgeler);
         kayit_tablosu.push_back(k);
     }
 }
 
 void gramer::yazdir() {
     for (const auto &kayit : kayit_tablosu) {
-        std::cout << *(kayit.non_terminal())  << " : ";
-        for (const auto &simge : *(kayit.acilim())) {
-            std::cout << &simge << " ";
+        std::cout << kayit.non_terminal()  << " : ";
+        for (const auto &simge : kayit.acilim()) {
+            std::cout << simge << " ";
         }
         std::cout << std::endl;
     }
