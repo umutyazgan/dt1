@@ -132,25 +132,6 @@ std::vector<std::vector<std::string>> gramer::acilimlar(std::string &nt, std::ve
 }
 
 void gramer::ilk(std::vector<std::string> &katar, std::set<std::string> &ilk_kumesi, std::vector<std::string> bakildi) {
-    /*
-    if (islower(katar[0][0])) {
-        ilk_kumesi.insert(katar[0]);
-        return;
-    }
-    for (const auto &kayit : kayit_tablosu) {
-        if (kayit.non_terminal() == katar[0]) {
-            if (islower(kayit.acilim()[0][0])) {
-                ilk_kumesi.insert(kayit.acilim()[0]);
-            }
-        }
-    }
-    for (const auto &kayit : kayit_tablosu) {
-        if (kayit.non_terminal() == katar[0]) {
-            if (islower(kayit.acilim()[0][0])) {
-                ilk_kumesi.insert(kayit.acilim()[0]);
-            }
-        }
-    }*/
     if (!non_terminal_mi(katar[0])) {
         ilk_kumesi.insert(katar[0]);
         return;
