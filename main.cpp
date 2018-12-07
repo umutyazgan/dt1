@@ -3,82 +3,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <set>
 
-/*
-class terminal {
-    private:
-        std::string katar = "";
-    public:
-        terminal(std::string k);
-        void set_terminal(std::string k);
-        std::string get_terminal();
-};
-
-terminal::terminal(std::string k) {
-    set_terminal(k);
-}
-
-void terminal::set_terminal(std::string k) {
-    katar = k;
-}
-
-std::string terminal::get_terminal() {
-    return katar;
-}
-*/
-
-/*
-class simge {
-    protected:
-        std::string isim;
-    public:
-        simge() = default;
-        explicit simge(std::string k);
-        std::string simgeyi_al();
-};
-
-
-//simge::simge() {}
-
-simge::simge(std::string k) {
-    isim = k;
-}
-
-std::string simge::simgeyi_al() {
-    return isim;
-}
-
-
-class terminal: public simge {
-    private:
-        bool terminal = true;
-    public:
-        bool terminal_mi();
-};
-
-bool terminal::terminal_mi() {
-    return terminal;
-}
-
-
-class nt: public simge {
-    private:
-        bool terminal = false;
-        std::vector<std::vector<simge*>*> acilimlar;
-    public:
-        nt(std::string k, std::vector<std::string> simgeler);
-        bool terminal_mi();
-};
-
-nt::nt(std::string k, std::vector<std::string> simgeler) {
-    isim = k;
-
-}
-
-bool nt::terminal_mi() {
-    return terminal;
-}
-*/
 
 class kural {
     private:
