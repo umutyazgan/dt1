@@ -145,6 +145,25 @@ void gramer::ilk(std::vector<std::string> &katar, std::set<std::string> &ilk_kum
 
 std::set<std::string> gramer::izle(std::string &nt) {
     std::set<std::string> izle_kumesi;
+    std::vector<std::string> acilim;
+    for (auto const &kayit : kayit_tablosu) {
+        acilim = kayit.acilim();
+        if (std::find(acilim.begin(), acilim.end(), nt) != acilim.end()) {
+            auto it = std::find(acilim.begin(), acilim.end(), nt);
+            it++;
+            if (it != acilim.end()) {
+                if (!non_terminal_mi(*it)) {
+                    izle_kumesi.insert(*it);
+                }
+                else {
+                    std::vector<std::string> katar;
+                    katar.push_back(*it);
+                    std::set<std::string> nt_ilk = ilk(katar);
+                    izle_kumesi.insert(nt_ilk.begin(), nt_ilk.end());
+                }
+            }
+        }
+    }
     return izle_kumesi;
 }
 
@@ -172,5 +191,13 @@ int main() {
         std::cout << e << " ";
     }
     std::cout << std::endl;
+    std::cout << std::endl;
+    std::string nt = "B";
+    std::set<std::string> izk = LR1.izle(nt);
+    for (auto const &e : izk) {
+        std::cout << e << " ";
+    }
+    std::cout << std::endl;
+
     return 0;
 }
