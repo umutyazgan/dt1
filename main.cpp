@@ -82,7 +82,7 @@ gramer::gramer(std::string kural_satirlari) {
 
 void gramer::yazdir() const {
     for (const auto &kayit : kayit_tablosu) {
-        std::cout << kayit.non_terminal()  << " : ";
+        std::cout << kayit.non_terminal()  << " -> ";
         for (const auto &simge : kayit.acilim()) {
             std::cout << simge << " ";
         }
@@ -178,15 +178,16 @@ int main() {
     ss << giris.rdbuf();
     giris.close();
     gramer LR1(ss.str());
+    std::cout << "Gramer:" << std::endl;
     LR1.yazdir();
     std::cout << std::endl;
     std::vector<std::string> v;
-   // v.emplace_back("a");
-    v.emplace_back("S’");
-    v.emplace_back("b");
+    v.emplace_back("A");
+    v.emplace_back("B");
     v.emplace_back("a");
     v.emplace_back("A");
     std::set<std::string> ik = LR1.ilk(v);
+    std::cout << "Örnek ilk kümesi: İLK(ABaA) = ";
     for (auto const &e : ik) {
         std::cout << e << " ";
     }
@@ -194,6 +195,7 @@ int main() {
     std::cout << std::endl;
     std::string nt = "B";
     std::set<std::string> izk = LR1.izle(nt);
+    std::cout << "Örnek izle kümesi: İZLE(B) = ";
     for (auto const &e : izk) {
         std::cout << e << " ";
     }
