@@ -1,11 +1,11 @@
 0.  S’ -> S
 1.  S -> A B
-2.  S -> S A B
+2.  S -> S B A
 3.  S -> S a B
 4.  A -> A b
 5.  A -> a
-6.  A -> b a b
+6.  A -> b B b
 7.  B -> S a
 7.  B -> b
-8.  B -> b b a
+8.  B -> b B a
 9.  B -> c
