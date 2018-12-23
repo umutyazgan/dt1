@@ -31,6 +31,12 @@ std::vector<std::string> kural::acilim() const {
 }
 
 
+class durum {
+    private:
+        std::vector<kural> parcalar;
+        std::vector<durum*> gecisler;
+};
+
 class gramer {
     private:
         std::vector<kural> kayit_tablosu;
@@ -43,6 +49,9 @@ class gramer {
         std::set<std::string> izle(std::string &nt);
         bool non_terminal_mi(std::string &s);
         std::vector<std::vector<std::string>> acilimlar(std::string &nt, std::vector<std::string> &bakildi);
+        void kilif(kural k, std::vector<kural>);
+        void nt_acilimi(const std::string &nt, std::vector<std::vector<std::string>> &ac);
+        void parcalar_kumesi();
 };
 
 gramer::gramer(std::string kural_satirlari) {
@@ -54,17 +63,14 @@ gramer::gramer(std::string kural_satirlari) {
         satir = kural_satirlari.substr(0, konum);
         konum2 = satir.find("  ");
         satir.erase(0, konum2 + 2);
-        // std::cout << satir << std::endl;
         satirlar.push_back(satir);
         kural_satirlari.erase(0, konum + 1);
     }
     konum2 = kural_satirlari.find("  ");
     kural_satirlari.erase(0, konum2 + 2);
     satirlar.push_back(kural_satirlari);
-    // std::cout << kural_satirlari << std::endl;
     std::string non_terminal;
     for (auto s : satirlar) {
-        // std::cout << s << std::endl;
         konum = s.find(" -> ");
         non_terminal = s.substr(0, konum);
         s.erase(0, konum + 4);
@@ -145,6 +151,10 @@ void gramer::ilk(std::vector<std::string> &katar, std::set<std::string> &ilk_kum
 
 std::set<std::string> gramer::izle(std::string &nt) {
     std::set<std::string> izle_kumesi;
+    if (nt == "S’") {
+        izle_kumesi.insert("$");
+        return izle_kumesi;
+    }
     std::vector<std::string> acilim;
     for (auto const &kayit : kayit_tablosu) {
         acilim = kayit.acilim();
@@ -162,17 +172,52 @@ std::set<std::string> gramer::izle(std::string &nt) {
                     izle_kumesi.insert(nt_ilk.begin(), nt_ilk.end());
                 }
             }
+            else {
+                izle_kumesi.insert("$");
+            }
         }
     }
     return izle_kumesi;
 }
 
+void gramer::nt_acilimi(const std::string &nt, std::vector<std::vector<std::string>> &ac) {
+
+}
+
+void gramer::kilif(kural k, std::vector<kural> sonuc) {
+    sonuc.push_back(k);
+    auto it = std::find(k.acilim().begin(), k.acilim().end(), ".");
+    it++;
+    if (non_terminal_mi(*it)) {
+        std::vector<std::vector<std::string>> ac;
+        nt_acilimi(*it, ac);
+    }
+    while (non_terminal_mi(*it)) {
+        for (const auto &kayit : kayit_tablosu) {
+            if (kayit.non_terminal() == *it) {
+
+            }
+        }
+    }
+}
+
+void gramer::parcalar_kumesi() {
+    std::vector<std::string> ac = kayit_tablosu[0].acilim();
+    std::string isim = kayit_tablosu[0].non_terminal();
+    ac.insert(ac.begin(), ".");
+    ac.push_back(",");
+    ac.push_back("$");
+    kural baslangic(isim, ac);
+    std::vector<kural> kilif_kumesi;
+    kilif(baslangic, kilif_kumesi);
+
+}
 
 int main() {
     std::ifstream giris("giriş.txt");
     if (!giris.is_open()){
-        std::cout << "Dosya açılamadı!" << std::endl;
-        return 1;
+        std::cerr << "Dosya açılamadı!" << std::endl;
+        return EXIT_FAILURE;
     }
     std::stringstream ss;
     ss << giris.rdbuf();
@@ -181,25 +226,29 @@ int main() {
     std::cout << "Gramer:" << std::endl;
     LR1.yazdir();
     std::cout << std::endl;
+    std::vector<std::string> b;
+    std::string s = "S";
+    std::vector<std::vector<std::string>> vvs;
+    vvs = LR1.acilimlar(s, b);
     std::vector<std::string> v;
-    v.emplace_back("A");
+    v.emplace_back("S");
     v.emplace_back("B");
     v.emplace_back("a");
     v.emplace_back("A");
     std::set<std::string> ik = LR1.ilk(v);
-    std::cout << "Örnek ilk kümesi: İLK(ABaA) = ";
+    std::cout << "Örnek ilk kümesi: İLK(SBaA) = {";
     for (auto const &e : ik) {
-        std::cout << e << " ";
+        std::cout << e << ", ";
     }
-    std::cout << std::endl;
+    std::cout << "}" << std::endl;
     std::cout << std::endl;
     std::string nt = "B";
     std::set<std::string> izk = LR1.izle(nt);
-    std::cout << "Örnek izle kümesi: İZLE(B) = ";
+    std::cout << "Örnek izle kümesi: İZLE(B) = {";
     for (auto const &e : izk) {
-        std::cout << e << " ";
+        std::cout << e << ", ";
     }
-    std::cout << std::endl;
+    std::cout << "}" << std::endl;
 
     return 0;
 }
