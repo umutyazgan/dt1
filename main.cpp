@@ -15,6 +15,9 @@ class kural {
         kural(std::string &isim, std::vector<std::string> &a);
         std::string non_terminal() const;
         std::vector<std::string> acilim() const;
+        bool operator==(const kural& k) {
+            return (this->nt == k.nt) && (this->ac == k.ac);
+        }
 };
 
 kural::kural(std::string &isim, std::vector<std::string> &a) {
@@ -34,8 +37,26 @@ std::vector<std::string> kural::acilim() const {
 class durum {
     private:
         std::vector<kural> parcalar;
-        std::vector<durum*> gecisler;
+        std::set<durum*> gecisler;
+    public:
+        durum(std::vector<kural> &p, std::set<durum*> &g);
+        std::vector<kural> parcalari_ver();
+        std::set<durum*> gecisleri_ver();
 };
+
+durum::durum(std::vector<kural> &p, std::set<durum*> &g) {
+    parcalar = p;
+    gecisler = g;
+}
+
+std::vector<kural> durum::parcalari_ver() {
+    return parcalar;
+}
+
+std::set<durum*> durum::gecisleri_ver() {
+    return gecisler;
+}
+
 
 class gramer {
     private:
@@ -49,9 +70,12 @@ class gramer {
         std::set<std::string> izle(std::string &nt);
         bool non_terminal_mi(std::string &s);
         std::vector<std::vector<std::string>> acilimlar(std::string &nt, std::vector<std::string> &bakildi);
-        void kilif(kural k, std::vector<kural>);
-        void nt_acilimi(const std::string &nt, std::vector<std::vector<std::string>> &ac);
+        void kilif(std::vector<kural> &kilif_kumesi);
+        //void nt_acilimi(const std::string &nt, std::vector<std::vector<std::string>> &ac);
         void parcalar_kumesi();
+        std::vector<kural> kilif_acilimlar(std::string &nt);
+        bool parca_eklenebilir(std::vector<kural> &kilif_kumesi, std::vector<kural> &bakildi);
+        std::vector<kural> kurallar();
 };
 
 gramer::gramer(std::string kural_satirlari) {
@@ -137,6 +161,34 @@ std::vector<std::vector<std::string>> gramer::acilimlar(std::string &nt, std::ve
     return ac;
 }
 
+bool gramer::parca_eklenebilir(std::vector<kural> &kilif_kumesi, std::vector<kural> &bakildi) {
+    for (const auto &k : kilif_kumesi) {
+        if (bakildi.end() != std::find(bakildi.begin(), bakildi.end(), k)) {
+            bakildi.push_back(k);
+            continue;
+        }
+        bakildi.push_back(k);
+        std::vector<std::string> parca_acilimi = k.acilim();
+        auto it = std::find(parca_acilimi.begin(), parca_acilimi.end(), ".");
+        it++;
+        if (non_terminal_mi(*it)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+std::vector<kural> gramer::kilif_acilimlar(std::string &nt) {
+    std::vector<kural> ac;
+    for (const auto &k : kayit_tablosu) {
+        if (k.non_terminal() == nt) {
+            ac.push_back(k);
+        }
+    }
+    return ac;
+}
+
 void gramer::ilk(std::vector<std::string> &katar, std::set<std::string> &ilk_kumesi, std::vector<std::string> bakildi) {
     if (!non_terminal_mi(katar[0])) {
         ilk_kumesi.insert(katar[0]);
@@ -180,26 +232,57 @@ std::set<std::string> gramer::izle(std::string &nt) {
     return izle_kumesi;
 }
 
-void gramer::nt_acilimi(const std::string &nt, std::vector<std::vector<std::string>> &ac) {
-
-}
-
-void gramer::kilif(kural k, std::vector<kural> sonuc) {
-    sonuc.push_back(k);
-    auto it = std::find(k.acilim().begin(), k.acilim().end(), ".");
-    it++;
-    if (non_terminal_mi(*it)) {
-        std::vector<std::vector<std::string>> ac;
-        nt_acilimi(*it, ac);
-    }
-    while (non_terminal_mi(*it)) {
-        for (const auto &kayit : kayit_tablosu) {
-            if (kayit.non_terminal() == *it) {
-
+void gramer::kilif(std::vector<kural> &kilif_kumesi) {
+    //kilif_kumesi.push_back(baslangic);
+    std::vector<kural> bakildi;
+    while (parca_eklenebilir(kilif_kumesi, bakildi)) {
+        std::vector<kural> eklenecekler;
+        for (const auto &k : kilif_kumesi) {
+            std::vector<std::string> parca_acilimi = k.acilim();
+            auto it = std::find(parca_acilimi.begin(), parca_acilimi.end(), ".");
+            it++;
+            if (non_terminal_mi(*it)) {
+                std::vector<kural> ac = kilif_acilimlar(*it);
+                for (const auto &a : ac) {
+                    std::vector<std::string> yeni_acilim = a.acilim();
+                    yeni_acilim.insert(yeni_acilim.begin(), ".");
+                    yeni_acilim.emplace_back(",");
+                    auto yeni_it = it + 1;
+                    if (*yeni_it == ",") {
+                        yeni_acilim.emplace_back("$");
+                    }
+                    else {
+                        std::vector<std::string> ilk_vek(yeni_it, parca_acilimi.end());
+                        ilk_vek.erase(remove(ilk_vek.begin(), ilk_vek.end(), ","), ilk_vek.end());
+                        std::set<std::string> il = ilk(ilk_vek);
+                        for ( const auto &i : il) {
+                            yeni_acilim.emplace_back(i);
+                            yeni_acilim.emplace_back(",");
+                        }
+                        yeni_acilim.emplace_back("$");
+                    }
+                    std::string x = a.non_terminal();
+                    kural yeni_kural = kural(x, yeni_acilim);
+                    eklenecekler.emplace_back(yeni_kural);
+                }
             }
         }
+        for (const auto &e : eklenecekler) {
+            kilif_kumesi.emplace_back(e);
+        }
     }
+    //std::set<kural> s(kilif_kumesi.begin(), kilif_kumesi.end());
+    //kilif_kumesi.assign(s.begin(), s.end());
+    std::vector<kural> tekrarsiz;
+    for (const auto &k : kilif_kumesi) {
+        auto it = std::find(tekrarsiz.begin(), tekrarsiz.end(), k);
+        if (it == tekrarsiz.end()) {
+            tekrarsiz.push_back(k);
+        }
+    }
+    kilif_kumesi = tekrarsiz;
 }
+
 
 void gramer::parcalar_kumesi() {
     std::vector<std::string> ac = kayit_tablosu[0].acilim();
@@ -209,9 +292,14 @@ void gramer::parcalar_kumesi() {
     ac.push_back("$");
     kural baslangic(isim, ac);
     std::vector<kural> kilif_kumesi;
-    kilif(baslangic, kilif_kumesi);
+    kilif(kilif_kumesi);
 
 }
+
+std::vector<kural> gramer::kurallar() {
+    return kayit_tablosu;
+}
+
 
 int main() {
     std::ifstream giris("giriş.txt");
@@ -249,6 +337,24 @@ int main() {
         std::cout << e << ", ";
     }
     std::cout << "}" << std::endl;
+
+    std::vector<kural> kilif_kumesi;
+    kural baslangic = LR1.kurallar()[0];
+    std::vector<std::string> bas_ac = baslangic.acilim();
+    std::string bas_nt = baslangic.non_terminal();
+    bas_ac.insert(bas_ac.begin(), ".");
+    bas_ac.emplace_back(",");
+    bas_ac.emplace_back("$");
+    baslangic = kural(bas_nt, bas_ac);
+    kilif_kumesi.emplace_back(baslangic);
+    LR1.kilif(kilif_kumesi);
+    for (const auto &k : kilif_kumesi) {
+        std::cout << k.non_terminal() << " -> ";
+        for (const auto &a : k.acilim()) {
+            std::cout << a << " ";
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }
